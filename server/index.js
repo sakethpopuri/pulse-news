@@ -48,33 +48,33 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 // ─── Image Proxy ───────────────────────────────────────────────────────────
-app.get('/api/proxy/image', (req, res) => {
+// ─── Image Proxy ───────────────────────────────────────────────────────────
+app.get('/api/proxy/image', async (req, res) => {
   const imageUrl = req.query.url;
   if (!imageUrl) return res.status(400).json({ message: 'No URL provided' });
 
   try {
-    const url = new URL(imageUrl);
-    const protocol = url.protocol === 'https:' ? https : http;
-
-    protocol.get(imageUrl, {
+    const axios = require('axios');
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer': url.origin,
+        'Referer': new URL(imageUrl).origin,
         'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-      }
-    }, (proxyRes) => {
-      const contentType = proxyRes.headers['content-type'] || 'image/jpeg';
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-      proxyRes.pipe(res);
-    }).on('error', () => {
-      res.status(500).json({ message: 'Image fetch failed' });
+      },
+      timeout: 10000,
     });
+
+    const contentType = response.headers['content-type'] || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.send(Buffer.from(response.data));
   } catch (err) {
-    res.status(400).json({ message: 'Invalid URL' });
+    console.error('[Image proxy error]', err.message);
+    res.status(500).json({ message: 'Image fetch failed' });
   }
 });
-
 // ─── Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
