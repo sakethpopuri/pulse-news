@@ -36,8 +36,8 @@ export default function NewsPage() {
   const [featured, ...rest] = displayArticles;
 
   return (
-<div className="pt-40 pb-16 px-4 md:px-6 max-w-7xl mx-auto">
-        {/* Page header */}
+<div className="pt-48 pb-16 px-4 md:px-6 max-w-7xl mx-auto">
+          {/* Page header */}
       <div className="mb-8 flex items-end justify-between border-b border-ink-800 pb-4">
         <div>
           <p className="section-label mb-1">{category === 'all' ? 'All stories' : 'Category'}</p>

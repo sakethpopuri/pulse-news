@@ -81,9 +81,8 @@ export default function App() {
       {!isLoginPage && (
   <>
     <Navbar onLoginClick={() => openLogin()}/>
-    <div className="pt-[88px]">
+    
       <NewsTicker/>
-    </div>
   </>
 )}
 
