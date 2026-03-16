@@ -79,13 +79,13 @@ export default function App() {
     <>
      <CopyrightToast />
       {!isLoginPage && (
-        <>
-          <Navbar onLoginClick={() => openLogin()}/>
-          <div className="pt-[88px]">
-            <NewsTicker/>
-          </div>
-        </>
-      )}
+  <>
+    <Navbar onLoginClick={() => openLogin()}/>
+    <div className="pt-[88px]">
+      <NewsTicker/>
+    </div>
+  </>
+)}
 
       <Routes>
         <Route path="/"              element={<NewsPage/>}/>

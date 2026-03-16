@@ -34,8 +34,7 @@ export default function Navbar({ onLoginClick }) {
   }) || 'all';
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-ink-950/95 backdrop-blur-md border-b border-ink-800' : 'bg-ink-950'}`}>
-      {/* Top bar */}
+<header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-ink-950/95 backdrop-blur-md border-b border-ink-800' : 'bg-ink-950'}`}>      {/* Top bar */}
       <div className="border-b border-ink-800 px-6 py-2 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <span className="section-label">Live updates</span>

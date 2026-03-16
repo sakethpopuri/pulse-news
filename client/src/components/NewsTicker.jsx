@@ -7,7 +7,7 @@ export default function NewsTicker() {
 
   const text = headlines.join('  ·  ');
   return (
-    <div className="bg-signal text-white overflow-hidden py-2 border-b border-signal/50">
+    <div className="fixed top-[88px] left-0 right-0 z-40 bg-signal text-white overflow-hidden py-2 border-b border-signal/50">
       <div className="flex gap-8 whitespace-nowrap animate-ticker">
         {[text, text].map((t, i) => (
           <span key={i} className="text-[11px] font-mono tracking-wide flex-shrink-0">{t}</span>
