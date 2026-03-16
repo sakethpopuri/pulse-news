@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const https = require('https');
+const http = require('http');
 const passport = require('./config/passport');
 
 const authRoutes = require('./routes/auth');
@@ -14,26 +16,20 @@ const { startCronJob } = require('./cron/scrapeJob');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS — must come before all routes
+// CORS
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow if no origin (mobile apps, curl)
     if (!origin) return callback(null, true);
-
     const allowed = [
       'http://localhost:3000',
       'http://localhost:3001',
       'https://pulse-news-jade.vercel.app',
       process.env.CLIENT_URL,
     ].filter(Boolean);
-
-    // Allow any vercel.app subdomain for preview deployments
     const isVercel = origin.endsWith('.vercel.app');
-
     if (allowed.includes(origin) || isVercel) {
       callback(null, true);
     } else {
-      console.log('CORS blocked:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -42,7 +38,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Handle preflight requests
 app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10kb' }));
@@ -50,7 +45,35 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-// Routes
+// ─── Image Proxy ───────────────────────────────────────────────────────────
+app.get('/api/proxy/image', (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) return res.status(400).json({ message: 'No URL provided' });
+
+  try {
+    const url = new URL(imageUrl);
+    const protocol = url.protocol === 'https:' ? https : http;
+
+    protocol.get(imageUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': url.origin,
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+      }
+    }, (proxyRes) => {
+      const contentType = proxyRes.headers['content-type'] || 'image/jpeg';
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      proxyRes.pipe(res);
+    }).on('error', () => {
+      res.status(500).json({ message: 'Image fetch failed' });
+    });
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid URL' });
+  }
+});
+
+// ─── Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
 
