@@ -17,15 +17,23 @@ const PORT = process.env.PORT || 5000;
 // CORS — must come before all routes
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow if no origin (mobile apps, curl)
+    if (!origin) return callback(null, true);
+
     const allowed = [
       'http://localhost:3000',
       'http://localhost:3001',
-      'http://127.0.0.1:3000',
+      'https://pulse-news-jade.vercel.app',
       process.env.CLIENT_URL,
     ].filter(Boolean);
-    if (!origin || allowed.includes(origin)) {
+
+    // Allow any vercel.app subdomain for preview deployments
+    const isVercel = origin.endsWith('.vercel.app');
+
+    if (allowed.includes(origin) || isVercel) {
       callback(null, true);
     } else {
+      console.log('CORS blocked:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
