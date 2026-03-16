@@ -8,43 +8,46 @@ async function scrapeAlJazeera() {
   const articles = [];
   try {
     const { data } = await axios.get(`${BASE}/news/`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PulseNewsBot/1.0)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
       timeout: 15000,
     });
     const $ = cheerio.load(data);
 
-    // AJ article cards
-    $('article, .article-card, .card').each((_, el) => {
-      const titleEl = $(el).find('h2 a, h3 a, .article-card__title a').first();
+    $('article, .article-card, [class*="article"]').each((_, el) => {
+      const titleEl = $(el).find('h2, h3, h4, [class*="title"], [class*="headline"]').first();
       const title = titleEl.text().trim();
-      if (!title || title.length < 15) return;
+      if (!title || title.length < 20) return;
 
-      const href = titleEl.attr('href') || $(el).find('a').first().attr('href') || '';
+      const linkEl = $(el).find('a[href]').first();
+      const href = linkEl.attr('href') || $(el).closest('a').attr('href') || '';
+      if (!href) return;
       const url = href.startsWith('http') ? href : `${BASE}${href}`;
 
-      const rawImage = $(el).find('img').first().attr('src')
-              || $(el).find('img').first().attr('data-src') || '';
-const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';
-      const desc = $(el).find('p, .article-card__summary').first().text().trim();
+      const img = $(el).find('img').first();
+      const rawImage = img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src') || '';
+      const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';
 
       if (!articles.find(a => a.url === url)) {
-        articles.push({ title, url, image, description: desc, source: SOURCE, publishedAt: new Date() });
+        articles.push({ title, url, image, description: '', source: SOURCE, publishedAt: new Date() });
       }
     });
 
-    // Fallback: links with /news/ path
+    // Fallback
     if (articles.length < 5) {
-      $('a[href^="/news/"]').each((_, el) => {
-        const title = $(el).find('h2, h3, span').first().text().trim()
-                   || $(el).attr('aria-label') || '';
-        if (!title || title.length < 15) return;
-        const url = `${BASE}${$(el).attr('href')}`;
-        const image = $(el).find('img').attr('src') || '';
+      $('a[href*="/news/"]').each((_, el) => {
+        const title = $(el).text().trim();
+        if (!title || title.length < 20) return;
+        const href = $(el).attr('href') || '';
+        const url = href.startsWith('http') ? href : `${BASE}${href}`;
+        const img = $(el).find('img').first();
+        const rawImage = img.attr('src') || img.attr('data-src') || '';
+        const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';
         if (!articles.find(a => a.url === url)) {
           articles.push({ title, url, image, description: '', source: SOURCE, publishedAt: new Date() });
         }
       });
     }
+
   } catch (err) {
     console.error('[Al Jazeera scraper error]', err.message);
   }
@@ -52,5 +55,4 @@ const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawI
   console.log(`[Al Jazeera] scraped ${articles.length} articles`);
   return articles.slice(0, 30);
 }
-
 module.exports = { scrapeAlJazeera };
