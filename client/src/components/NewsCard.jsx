@@ -2,8 +2,8 @@ import { CATEGORY_CONFIG, SOURCE_COLORS, timeAgo } from '../utils/helpers';
 
 const proxyImage = (url) => {
   if (!url) return '';
-  if (import.meta.env.DEV) return url;
-  return `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/proxy/image?url=${encodeURIComponent(url)}`;
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  return `${apiUrl.replace('/api', '')}/api/proxy/image?url=${encodeURIComponent(url)}`;
 };
 
 export default function NewsCard({ article, index = 0, featured = false }) {
