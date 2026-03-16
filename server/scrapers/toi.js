@@ -22,8 +22,9 @@ async function scrapeTOI() {
       if (!url.includes('timesofindia')) return;
 
       const container = $(el).closest('li, article, div').first();
-      const image = container.find('img').first().attr('src')
-                 || container.find('img').first().attr('data-src') || '';
+      const rawImage = container.find('img').first().attr('src')
+              || container.find('img').first().attr('data-src') || '';
+const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';
 
       if (!articles.find(a => a.url === url)) {
         articles.push({ title, url, image, description: '', source: SOURCE, publishedAt: new Date() });

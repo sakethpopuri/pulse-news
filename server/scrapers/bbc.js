@@ -24,7 +24,8 @@ async function scrapeBBC() {
       const url = href.startsWith('http') ? href : `${BASE}${href}`;
 
       const imgEl = $(el).closest('[data-testid]').find('img').first();
-      const image = imgEl.attr('src') || imgEl.attr('data-src') || '';
+      const rawImage = imgEl.attr('src') || imgEl.attr('data-src') || '';
+      const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';
 
       const desc = $(el).find('p').first().text().trim();
 

@@ -20,8 +20,8 @@ async function scrapeReuters() {
       const href = $(el).attr('href') || '';
       const url = href.startsWith('http') ? href : `${BASE}${href}`;
       const container = $(el).closest('li, article, [class*="story"]');
-      const image = container.find('img').first().attr('src') || '';
-      const desc = container.find('p').first().text().trim();
+const rawImage = container.find('img').first().attr('src') || '';
+const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';      const desc = container.find('p').first().text().trim();
       if (!articles.find(a => a.url === url)) {
         articles.push({ title, url, image, description: desc, source: SOURCE, publishedAt: new Date() });
       }

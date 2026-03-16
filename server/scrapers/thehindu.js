@@ -22,8 +22,9 @@ async function scrapeTheHindu() {
       const href = titleEl.attr('href') || '';
       const url = href.startsWith('http') ? href : `${BASE}${href}`;
 
-      const image = $(el).find('img').first().attr('src')
-                 || $(el).find('img').first().attr('data-src') || '';
+     const rawImage = $(el).find('img').first().attr('src')
+              || $(el).find('img').first().attr('data-src') || '';
+     const image = rawImage.startsWith('http') ? rawImage : rawImage ? `${BASE}${rawImage}` : '';
       const desc = $(el).find('p, .intro').first().text().trim();
 
       if (!articles.find(a => a.url === url)) {
